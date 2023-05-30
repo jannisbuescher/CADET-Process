@@ -565,7 +565,7 @@ class Population():
         singular_labels = []
 
         for i, col in enumerate(x.transpose()):
-            if len(np.unique(col)) == 1:
+            if len(np.unique(col)) == 1 and len(col) > 1:
                 singular_indices.append(i)
                 singular_labels.append(labels[i])
 

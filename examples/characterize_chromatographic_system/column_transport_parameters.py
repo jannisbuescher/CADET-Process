@@ -17,7 +17,7 @@
 from pathlib import Path
 import sys
 
-root_dir = Path('../../../../').resolve()
+root_dir = Path('../../').resolve()
 sys.path.append(root_dir.as_posix())
 
 # %% [markdown]
@@ -39,7 +39,10 @@ sys.path.append(root_dir.as_posix())
 
 # %%
 import numpy as np
-data = np.loadtxt('experimental_data/non_pore_penetrating_tracer.csv', delimiter=',')
+import os
+
+DATA_DIR = "examples/characterize_chromatographic_system"
+data = np.loadtxt(os.path.join(DATA_DIR,'experimental_data/non_pore_penetrating_tracer.csv'), delimiter=',')
 
 time_experiment = data[:, 0]
 c_experiment = data[:, 1]
@@ -49,8 +52,8 @@ tracer_peak = ReferenceIO(
     'Tracer Peak', time_experiment, c_experiment
 )
 
-if __name__ == '__main__':
-    _ = tracer_peak.plot()
+# if __name__ == '__main__':
+#     _ = tracer_peak.plot()
 
 # %% [markdown]
 # ### Reference Model
@@ -75,11 +78,12 @@ eluent.c = [0]
 
 column = LumpedRateModelWithPores(component_system, name='column')
 
+# parameters, not all of which are to be optimized:
 column.length = 0.1
 column.diameter = 0.0077
 column.particle_radius = 34e-6
 
-column.axial_dispersion = 1e-8
+column.axial_dispersion = 1e-6
 column.bed_porosity = 0.3
 column.particle_porosity = 0.8
 column.film_diffusion = [0]
@@ -143,9 +147,9 @@ process.add_event(
 from CADETProcess.simulator import Cadet
 simulator = Cadet()
 
-if __name__ == '__main__':
-    simulation_results = simulator.simulate(process)
-    _ = simulation_results.solution.outlet.inlet.plot()
+# if __name__ == '__main__':
+#     simulation_results = simulator.simulate(process)
+#     _ = simulation_results.solution.outlet.inlet.plot()
 
 # %% [markdown]
 # ### Comparator
@@ -159,8 +163,8 @@ comparator.add_difference_metric(
     'NRMSE', tracer_peak, 'outlet.outlet',
 )
 
-if __name__ == '__main__':
-    comparator.plot_comparison(simulation_results)
+# if __name__ == '__main__':
+#     comparator.plot_comparison(simulation_results)
 
 # %% [markdown]
 # ### Optimization Problem
@@ -195,7 +199,7 @@ def callback(simulation_results, individual, evaluation_object, callbacks_dir='.
     comparator.plot_comparison(
         simulation_results,
         file_name=f'{callbacks_dir}/{individual.id}_{evaluation_object}_comparison.png',
-        show=False
+        show=True
     )
 
 
@@ -203,21 +207,79 @@ optimization_problem.add_callback(callback, requires=[simulator])
 
 # %% [markdown]
 # ### Optimizer
-
+# if algorithm.n_gen >= n_max_gen:
+        #     exit_message = 'Max number of generations exceeded.'
+        #     exit_flag = 1
+        # else:
+        #     exit_flag = 0
+        #     exit_message = 'success'
 # %%
 from CADETProcess.optimization import U_NSGA3
-optimizer = U_NSGA3()
+optimizer = U_NSGA3()# if algorithm.n_gen >= n_max_gen:
+        #     exit_message = 'Max number of generations exceeded.'
+        #     exit_flag = 1
+        # else:
+        #     exit_flag = 0
+        #     exit_message = 'success'# if algorithm.n_gen >= n_max_gen:
+        #     exit_message = 'Max number of generations exceeded.'
+        #     exit_flag = 1
+        # else:
+        #     exit_flag = 0
+        #     exit_message = 'success'
 
 # %% [markdown]
 # ```{note}
 # For performance reasons, the optimization is currently not run when building the documentation.
 # In future, we will try to sideload pre-computed results to also discuss them here.
 # ```
-#
-# ```
+
+
 # if __name__ == '__main__':
 #     optimization_results = optimizer.optimize(
 #         optimization_problem,
 #         use_checkpoint=True
 #     )
-# ```
+
+from ax.service.managed_loop import optimize
+from CADETProcess.optimization import AxInterface
+
+if __name__ == '__main__':
+    optimizer = AxInterface()
+    optimization_results = optimizer.optimize(
+        optimization_problem
+#        use_checkpoint=True
+    )
+
+    show = 0
+
+# if __name__ == '__main__':
+#     def eval_fun(parameterization):
+#         x = np.array([parameterization.get(f"x{i+1}") for i in range(2)])
+#         obj = optimization_problem.evaluate_objectives_population(x, untransform=True)
+#         return {"objective": (obj, 0.0)}
+
+#     best_parameters, values, experiment, model = optimize(
+#         parameters=[
+#             {
+#                 "name": "x1",
+#                 "type": "range",
+#                 "bounds": [0.0, 1.0],
+#                 "value_type": "float",  # Optional, defaults to inference from type of "bounds".
+#                 "log_scale": False,  # Optional, defaults to False.
+#             },
+#             {
+#                 "name": "x2",
+#                 "type": "range",
+#                 "bounds": [0.0, 1.0],
+#             }
+#         ],
+#         experiment_name="test",
+#         objective_name="objective",
+#         evaluation_function=eval_fun,
+#         minimize=True,  # Optional, defaults to False.
+#         total_trials=20, # Optional.
+#     )
+
+
+#     error = optimization_problem.evaluate_objectives(list(best_parameters.values()), untransform=True)
+    
