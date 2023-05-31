@@ -83,8 +83,8 @@ column.length = 0.1
 column.diameter = 0.0077
 column.particle_radius = 34e-6
 
-column.axial_dispersion = 1e-6
-column.bed_porosity = 0.3
+column.axial_dispersion = 2.15057213e-07 # 1e-6
+column.bed_porosity = 4.12226451e-01 # 0.3
 column.particle_porosity = 0.8
 column.film_diffusion = [0]
 
@@ -147,8 +147,9 @@ process.add_event(
 from CADETProcess.simulator import Cadet
 simulator = Cadet()
 
-# if __name__ == '__main__':
-#     simulation_results = simulator.simulate(process)
+if __name__ == '__main__':
+    simulation_results = simulator.simulate(process)
+    c_target = simulation_results.solution.outlet.outlet.solution
 #     _ = simulation_results.solution.outlet.inlet.plot()
 
 # %% [markdown]
@@ -242,15 +243,26 @@ optimizer = U_NSGA3()# if algorithm.n_gen >= n_max_gen:
 
 from ax.service.managed_loop import optimize
 from CADETProcess.optimization import AxInterface
+from CADETProcess.nn import NNInterface
 
 if __name__ == '__main__':
-    optimizer = AxInterface()
+    xx = c_experiment[1::2]
+    x = np.zeros(901)
+    x[171:475] = xx
+    c_target = c_target.reshape(1,-1)
+    optimizer = NNInterface()
     optimization_results = optimizer.optimize(
-        optimization_problem
+        optimization_problem,
+        c_target
 #        use_checkpoint=True
     )
 
-    show = 0
+#     optimizer = AxInterface() # result [4.12226451e-01 2.15057213e-07]
+#     optimization_results = optimizer.optimize(
+#         optimization_problem
+# #        use_checkpoint=True
+#     )
+
 
 # if __name__ == '__main__':
 #     def eval_fun(parameterization):

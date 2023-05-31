@@ -34,22 +34,21 @@ class DataGenerator:
 
     def generate(self, nb_examples):
         vars = self.op.independent_variables
-        low = self.op.lower_bounds
-        high = self.op.upper_bounds
-
         data = np.ndarray((nb_examples, len(vars) + 901))
 
         for i in range(nb_examples):
             #param = DataGenerator._sample(high, low)  # illegal
-            param = self.op.create_initial_values(
-                1, method='random', seed=rng.integers(1,1000000)
-            )[0]
+            # param = self.op.create_initial_values(
+            #     1, method='random', seed=rng.integers(1,1000000)
+            # )[0]
+            param = DataGenerator._sample(len(vars))
+
 
             # for j, var in enumerate(vars):
             #     path = var.parameter_path
             #     name = var.name
             #     value = param[j]
-            process = DataGenerator._get_process(param)
+            process = DataGenerator._get_process(self.op.untransform(np.array(param).reshape(1,-1))[0])
             
             #self.process.parameters.update(param_update) # nested_dict / addict / parameter path
             simulation_results = self.sim.simulate(process)
@@ -61,8 +60,8 @@ class DataGenerator:
         return data
     
     @staticmethod
-    def _sample(high, low):
-        return np.random.uniform(low=low, high=high)
+    def _sample(n):
+        return rng.uniform(low=0, high=1.0, size=n)
     
     @staticmethod
     def _get_process(param):

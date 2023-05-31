@@ -12,23 +12,6 @@ from ax.service.managed_loop import optimize
 class AxInterface(OptimizerBase):
     """Wrapper around ax."""
 
-    supports_multi_objective = True
-    supports_linear_constraints = True
-    supports_linear_equality_constraints = True
-    supports_nonlinear_constraints = True
-
-    seed = UnsignedInteger(default=12345)
-    pop_size = UnsignedInteger()
-    xtol = UnsignedFloat(default=1e-8)
-    cvtol = UnsignedFloat(default=1e-6)
-    cv_tol = cvtol
-    ftol = UnsignedFloat(default=0.0025)
-    n_max_gen = UnsignedInteger()
-    n_max_evals = UnsignedInteger(default=100000)
-    _specific_options = [
-        'seed', 'pop_size', 'xtol', 'cvtol', 'ftol', 'n_max_gen', 'n_max_evals',
-    ]
-
     def run(self, optimization_problem, x0=None):
         """Solve optimization problem using functional ax implementation.
 
@@ -89,6 +72,8 @@ class AxInterface(OptimizerBase):
         f = optimization_problem.evaluate_objectives(list(best_parameters.values()), untransform=True)
         #g = optimization_problem.evaluate_nonlinear_constraints(x)
         #cv = optimization_problem.evaluate_nonlinear_constraints_violation(x)
+
+        x = optimization_problem.untransform(np.array(x))
 
         self.run_post_evaluation_processing(x, f, None, None, 1)
 

@@ -194,5 +194,5 @@ from CADETProcess.nn import DataGenerator
 
 if __name__ == '__main__':
     gen = DataGenerator(optimization_problem, simulator, process)
-    data = gen.generate(100)
-    np.save('./CADETProcess/nn/data/data_100', data)
+    data = gen.generate(1000)
+    np.save('./CADETProcess/nn/data/data_1000', data)
